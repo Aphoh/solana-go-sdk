@@ -73,16 +73,9 @@ func NewSecp256k1InstructionMultipleSigs(privs []*ecdsa.PrivateKey, msgs [][]byt
 	if len(privs) != len(msgs) {
 		return types.Instruction{}, errors.New(fmt.Sprintf("Provided a different number of keys and messages: %d private keys and %d messages.", len(privs), len(msgs)))
 	}
-
 	n := len(privs)
-
-	instrData := []byte{}
-	instrData = append(instrData, uint8(n)) // Count of Offsets structs
-	// Append empty offsets structs to be filled it once we add our message data
-	preData := [OffsetsSerializedSize]byte{}
-	for i := 0; i < n; i++ {
-		instrData = append(instrData, preData[:]...)
-	}
+	sigs := make([][]byte, n)
+	addrs := make([][]byte, n)
 
 	for i, msg := range msgs {
 		priv := privs[i]
@@ -100,6 +93,30 @@ func NewSecp256k1InstructionMultipleSigs(privs []*ecdsa.PrivateKey, msgs [][]byt
 		if err != nil {
 			return types.Instruction{}, err
 		}
+
+		sigs[i] = sig
+		addrs[i] = addr
+	}
+
+	return NewSecp256k1InstructionFromSigs(msgs, sigs, addrs, thisInstrIndex)
+}
+
+func NewSecp256k1InstructionFromSigs(msgs [][]byte, sigs [][]byte, addrs [][]byte, thisInstrIndex uint8) (types.Instruction, error) {
+	if len(msgs) != len(sigs) || len(sigs) != len(addrs) {
+		return types.Instruction{}, fmt.Errorf("Provided a different number of keys and messages")
+	}
+	n := len(msgs)
+	instrData := []byte{}
+	instrData = append(instrData, uint8(n)) // Count of Offsets structs
+	// Append empty offsets structs to be filled it once we add our message data
+	preData := [OffsetsSerializedSize]byte{}
+	for i := 0; i < n; i++ {
+		instrData = append(instrData, preData[:]...)
+	}
+
+	for i, msg := range msgs {
+		sig := sigs[i]
+		addr := addrs[i]
 
 		ethOffset := len(instrData)
 		instrData = append(instrData, addr[:]...)
