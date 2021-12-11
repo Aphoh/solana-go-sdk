@@ -8,4 +8,5 @@ require (
 	github.com/mr-tron/base58 v1.2.0
 	github.com/near/borsh-go v0.3.1-0.20210831082424-4377deff6791
 	github.com/stretchr/testify v1.7.0
+	golang.org/x/net v0.0.0-20211209124913-491a49abca63 // indirect
 )
