@@ -27,10 +27,13 @@ func (c *WebsocketClient) ConfirmTransaction(signature string, timeout time.Dura
 	}
 
 	cfg := rpc.SignatureSubscribeConfig{Commitment: "finalized"}
-
+	req := rpc.NewSignatureSubscribeRequest(signature, cfg)
 	var res rpc.SignatureSubscribeResponse
-	err = websocket.JSON.Send(ws, []interface{}{signature, cfg})
-	if err := checkRpcResult(res.GeneralResponse, err); err != nil {
+	if err = websocket.JSON.Send(ws, &req); err != nil {
+		return err
+	}
+	err = websocket.JSON.Receive(ws, &res)
+	if err = checkRpcResult(res.GeneralResponse, err); err != nil {
 		return err
 	}
 

@@ -15,6 +15,22 @@ type SignatureNotificationCall struct {
 	Params  SignatureNotificationParams `json:"params"`
 }
 
+type SignatureSubscribeRequest struct {
+	JsonRPC string        `json:"jsonrpc"`
+	Id      uint64        `json:"id"`
+	Method  string        `json:"method"`
+	Params  []interface{} `json:"params"`
+}
+
+func NewSignatureSubscribeRequest(signature string, cfg SignatureSubscribeConfig) SignatureSubscribeRequest {
+	return SignatureSubscribeRequest{
+		JsonRPC: "2.0",
+		Id:      1,
+		Method:  "signatureSubscribe",
+		Params:  []interface{}{signature, cfg},
+	}
+}
+
 type SignatureNotificationResult struct {
 	Context Context                    `json:"context"`
 	Value   SignatureNotificationValue `json:"value"`
